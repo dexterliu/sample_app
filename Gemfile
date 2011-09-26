@@ -10,6 +10,7 @@ end
 
 group :test do
    gem 'rspec-rails', '2.0.0'
+   gem 'spork', '0.9.0.rc9'
 end
   
 

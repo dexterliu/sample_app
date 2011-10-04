@@ -11,6 +11,39 @@ class User < ActiveRecord::Base
   validates :password, :presence => true,
                        :confirmation => true,
                        :length   => {:within => 6..40 }
+                       
+  before_save :encrypt_password       #before saving anything, it will run the encrypt_password method - this will ensure that the encrypted password is set in the db 
+  
+  def has_password?(submitted_password)
+    encrypted_password == encrypt(submitted_password)  #guessing the submitted expects params
+  end
+  
+  class << self
+    def authenticate(email, submitted_password)
+      user = find_by_email(email)
+      return nil  if user.nil?
+      return user if user.has_password?(submitted_password)
+    end
+  end
+    
+  private       #states that the methods below are only accessible within the model
+    def encrypt_password  
+      self.salt = make_salt if self.new_record?  #new_record? is a boolean method from activerecord
+      self.encrypted_password = encrypt(self.password)
+    end
+    
+    def encrypt(string)
+      secure_hash("#{salt}--#{string}") 
+    end
+    
+    def secure_hash(string)
+      Digest::SHA2.hexdigest(string)
+    end
+    
+    def make_salt
+      secure_hash("#{Time.now.utc}--#{password}")
+    end
+    
 end
 
 

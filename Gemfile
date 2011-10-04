@@ -1,8 +1,8 @@
 source 'http://rubygems.org'
 
 gem 'rails', '3.0.9'
-
 gem 'sqlite3-ruby', '1.2.5', :require => 'sqlite3'
+gem 'gravatar_image_tag', '1.0.0'
 
 group :development do
    gem 'rspec-rails', '2.0.0'
@@ -18,6 +18,7 @@ group :test do
    gem 'autotest-fsevent', '0.2.4'
    gem 'autotest-growl', '0.2.9'
    gem 'factory_girl_rails', '1.2'
+   
 end
   
 

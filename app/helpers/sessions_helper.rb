@@ -19,12 +19,11 @@ module SessionsHelper
   
   private
     def user_from_remember_token
-      User.authenticate_with_salt(*remember_token)
+      User.authenticate_with_salt(*remember_token)  # when you put the * it removes the brackets thereby giving it two fields
     end
     
     def remember_token
       cookies.signed[:remember_token] || [nil, nil]
-    end
-  
+    end  
 end
 

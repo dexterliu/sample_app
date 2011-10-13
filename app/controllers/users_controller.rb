@@ -1,7 +1,8 @@
 class UsersController < ApplicationController
 
   before_filter :authenticate, :only => [:edit, :update]  #before filter goes to authenticate see it below
-
+  before_filter :correct_user, :only => [:edit, :update] 
+  
   def show
     @user = User.find(params[:id])
     @title = @user.name
@@ -47,7 +48,9 @@ class UsersController < ApplicationController
       deny_access unless signed_in? 
     end
     
-    def deny_access
-      redirect_to signin_path, :notice => "Please sign in to access this page."
+    def correct_user
+      @user = User.find(params[:id])
+      redirect_to(root_path) unless current_user?(@user)
     end
+
 end

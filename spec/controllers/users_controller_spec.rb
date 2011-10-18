@@ -46,6 +46,21 @@ describe UsersController do
         response.should have_selector('a', :href => "/users?page=2", :content => "2")
         response.should have_selector('a', :href => "/users?page=2", :content => "Next")
       end   
+      
+      it "should have delete links for admins" do
+        @user.toggle!(:admin)
+        other_user = User.all.second
+        get :index
+        response.should have_selector('a', :href => user_path(other_user),
+                                           :content => "delete")
+      end
+      
+      it "should not have delete links for admins" do
+        other_user = User.all.second
+        get :index
+        response.should_not have_selector('a', :href => user_path(other_user),
+                                           :content => "delete")
+      end
     end
   end  
   
@@ -83,9 +98,7 @@ describe UsersController do
     it "should have the right url" do
       get :show, :id => @user
       response.should have_selector('td>a', :content => user_path(@user), :href => user_path(@user))
-    end
-      
-    
+    end    
   end 
             
   describe "GET 'new'" do
@@ -101,7 +114,7 @@ describe UsersController do
     end
   end
   
-  describe "Post 'create'" do
+  describe "POST 'create'" do
     
     describe "failure" do
       before(:each) do
@@ -218,16 +231,15 @@ describe UsersController do
       it "should have a flash message" do
         put :update, :id => @user, :user => @attr
         flash[:success].should =~ /updated/
-      end
+      end      
+    end
+  end  
       
-    end
-    
-  end        
 
-  describe "authentication of edit/update actions" do
-    before(:each) do
-      @user = Factory(:user)
-    end
+    describe "authentication of edit/update actions" do
+      before(:each) do
+        @user = Factory(:user)
+      end
     
     describe "for non-signed in users" do
       it "should deny access to 'edit'" do
@@ -256,6 +268,55 @@ describe UsersController do
       it "should require matching users for 'update'" do
         put :update, :id => @user, :user => {}   #this needs a hash so we've put this empty
         response.should redirect_to(root_path)        
+      end
+    end   
+
+    end  
+  
+  
+  describe "DELETE 'destroy'" do
+    before(:each) do
+      @user = Factory(:user)
+    end
+      
+    describe "as a non-signed-in user" do
+      it "should deny access" do
+        delete :destroy, :id => @user
+        response.should redirect_to(signin_path)
+      end
+    end
+    
+    describe "as a non-admin user" do
+      it "should protect the action" do
+        test_sign_in(@user)
+        delete :destroy, :id => @user
+        response.should redirect_to(root_path)
+      end
+    end
+    
+    describe "as an admin user" do
+      before(:each) do
+        @admin = Factory(:user, :email => "admin@example.com", :admin => true)
+        test_sign_in(@admin)
+      end
+
+      it "should destroy the user" do
+        # insert a lambda block - this is an anonymous block 
+        lambda do
+          delete :destroy, :id => @user          
+        end.should change(User, :count).by(-1)
+      end
+      
+      it "should redirect to the users page" do
+        delete :destroy, :id => @user
+        flash[:success].should =~ /destroyed/i
+        response.should redirect_to(users_path)
+      end
+      
+      it "should not be able to destroy itself" do
+        lambda do  
+          delete :destroy, :id => @admin
+        end.should_not change(User, :count)
       end
     end    
   end

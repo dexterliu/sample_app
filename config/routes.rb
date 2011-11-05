@@ -2,6 +2,8 @@ SampleApp::Application.routes.draw do
 
   resources :users #this gives all the REST access to the users instances
   resources :sessions, :only => [:new, :create, :destroy]
+  resources :microposts, :only => [:create, :destroy]
+ 
  
   root :to => "pages#home"
  

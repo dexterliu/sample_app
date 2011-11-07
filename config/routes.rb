@@ -1,10 +1,14 @@
 SampleApp::Application.routes.draw do
 
-  resources :users #this gives all the REST access to the users instances
-  resources :sessions, :only => [:new, :create, :destroy]
-  resources :microposts, :only => [:create, :destroy]
- 
- 
+  resources :users do #this gives all the REST access to the users instances
+    member do
+      get :following, :followers  
+    end
+  end
+  resources :sessions,      :only => [:new, :create, :destroy]
+  resources :microposts,    :only => [:create, :destroy]
+  resources :relationships, :only => [:create, :destroy]
+  
   root :to => "pages#home"
  
   match '/contact', :to => 'pages#contact'

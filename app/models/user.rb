@@ -25,6 +25,8 @@ class User < ActiveRecord::Base
                        
   before_save :encrypt_password       #before saving anything, it will run the encrypt_password method - this will ensure that the encrypted password is set in the db 
   
+  scope :admin, where(:admin => true) #scoping a model - this gives us the ability of showing all admin users
+  
   def has_password?(submitted_password)
     encrypted_password == encrypt(submitted_password)  #guessing the submitted expects params
   end
@@ -42,7 +44,7 @@ class User < ActiveRecord::Base
   end
   
   def feed
-    Micropost.where("user_id =?", id)
+    Micropost.from_users_followed_by(self)
   end
   
   class << self
